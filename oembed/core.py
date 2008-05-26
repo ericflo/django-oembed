@@ -11,8 +11,10 @@ except ImportError:
     from django.utils import simplejson
 from django.conf import settings
 from django.utils.safestring import mark_safe
-from django.utils.html import conditional_escape
+#from django.utils.html import conditional_escape
 from oembed.models import ProviderRule, StoredOEmbed
+
+conditional_escape = lambda x: x
 
 END_OVERRIDES = (')', ',', '.', '>', ']', ';')
 MAX_WIDTH = getattr(settings, "OEMBED_MAX_WIDTH", 320)
@@ -106,13 +108,15 @@ def replace(text, max_width=MAX_WIDTH, max_height=MAX_HEIGHT):
                 to_append += part[-1]
                 part = part[:-1]
             indices.append(index)
-            urls.update(part)
+            urls.add(part)
             indices_rules.append(i)
             parts.append(part)
+            print part
             index += 1
             if to_append:
                 parts.append(to_append)
                 index += 1
+    print urls
     for stored_embed in StoredOEmbed.objects.filter(match__in=urls, max_width=max_width, max_height = max_height):
         stored[stored_embed.match] = stored_embed
     for i, id_to_replace in enumerate(indices):
