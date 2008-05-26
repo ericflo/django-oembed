@@ -1,0 +1,52 @@
+8
+
+dir
+106
+https://django-threadedcomments.googlecode.com/svn/trunk/tests
+https://django-threadedcomments.googlecode.com/svn
+
+
+
+2008-03-08T00:25:27.561203Z
+88
+floguy
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+60388069-7741-0410-adde-d57be00c0a97
+
+settings.py
+file
+
+
+
+
+2008-05-15T00:03:19.000000Z
+5c37c6d53bcd4a612fc5745ff30c0191
+2008-03-08T00:25:27.561203Z
+88
+floguy
+
+runtests.py
+file
+
+
+
+
+2008-05-15T00:03:19.000000Z
+b7c39ff05b83afa6fc4d389a9853eb02
+2008-01-11T05:24:43.667517Z
+18
+floguy
+
