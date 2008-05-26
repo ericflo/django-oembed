@@ -13,6 +13,7 @@ from django.conf import settings
 from django.utils.safestring import mark_safe
 #from django.utils.html import conditional_escape
 from oembed.models import ProviderRule, StoredOEmbed
+from django.template.loader import render_to_string
 
 conditional_escape = lambda x: x
 
@@ -20,12 +21,6 @@ END_OVERRIDES = (')', ',', '.', '>', ']', ';')
 MAX_WIDTH = getattr(settings, "OEMBED_MAX_WIDTH", 320)
 MAX_HEIGHT = getattr(settings, "OEMBED_MAX_HEIGHT", 240)
 FORMAT = getattr(settings, "OEMBED_FORMAT", "json")
-
-HTML_MAPPING = {
-    'photo': 'url',
-    'video': 'html',
-    'rich': 'html',
-}
 
 def fetch(url, user_agent="django-oembed"):
         request = urllib2.Request(url)
@@ -111,12 +106,10 @@ def replace(text, max_width=MAX_WIDTH, max_height=MAX_HEIGHT):
             urls.add(part)
             indices_rules.append(i)
             parts.append(part)
-            print part
             index += 1
             if to_append:
                 parts.append(to_append)
                 index += 1
-    print urls
     for stored_embed in StoredOEmbed.objects.filter(match__in=urls, max_width=max_width, max_height = max_height):
         stored[stored_embed.match] = stored_embed
     for i, id_to_replace in enumerate(indices):
@@ -130,10 +123,7 @@ def replace(text, max_width=MAX_WIDTH, max_height=MAX_HEIGHT):
                     rule.endpoint, part, max_width, max_height, FORMAT
                 )
                 resp = simplejson.loads(fetch(url))
-                replacement = None
-                for key in HTML_MAPPING.iterkeys():
-                    if resp['type'] == key:
-                        replacement = resp[HTML_MAPPING[key]]
+                replacement = render_to_string('oembed/%s.html' % resp['type'], {'response': resp})
                 if replacement:
                     stored_embed = StoredOEmbed.objects.create(
                         match = part,
