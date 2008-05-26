@@ -31,6 +31,3 @@ class StoredOEmbed(models.Model):
     
     def __unicode__(self):
         return self.match
-    
-    class Admin:
-        pass

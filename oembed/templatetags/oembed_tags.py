@@ -4,6 +4,15 @@ from oembed.core import replace
 register = template.Library()
 
 def oembed(parser, token):
+    """
+    A node which parses everything between its two nodes, and replaces any links
+    with OEmbed-provided objects, if possible.
+    
+    Supports one optional argument, which is the maximum width and height, 
+    specified like so:
+    
+        {% oembed 640x480 %}http://www.viddler.com/explore/SYSTM/videos/49/{% endoembed %}
+    """
     args = token.contents.split()
     if len(args) > 2:
         raise template.TemplateSyntaxError("Oembed tag takes only one (option" \
