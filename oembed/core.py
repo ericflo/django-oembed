@@ -11,28 +11,28 @@ except ImportError:
     from django.utils import simplejson
 from django.conf import settings
 from django.utils.safestring import mark_safe
-#from django.utils.html import conditional_escape
 from oembed.models import ProviderRule, StoredOEmbed
 from django.template.loader import render_to_string
-
-conditional_escape = lambda x: x
 
 END_OVERRIDES = (')', ',', '.', '>', ']', ';')
 MAX_WIDTH = getattr(settings, "OEMBED_MAX_WIDTH", 320)
 MAX_HEIGHT = getattr(settings, "OEMBED_MAX_HEIGHT", 240)
 FORMAT = getattr(settings, "OEMBED_FORMAT", "json")
 
-def fetch(url, user_agent="django-oembed"):
-        request = urllib2.Request(url)
-        request.add_header('User-Agent', user_agent)
-        request.add_header('Accept-Encoding', 'gzip')
-        opener = urllib2.build_opener()
-        f = opener.open(request)
-        result = f.read()
-        if f.headers.get('content-encoding', '') == 'gzip':
-            result = gzip.GzipFile(fileobj=StringIO(result)).read()
-        f.close()
-        return result
+def fetch(url, user_agent="django-oembed/0.1"):
+    """
+    Fetches from a URL, respecting GZip encoding, etc.
+    """
+    request = urllib2.Request(url)
+    request.add_header('User-Agent', user_agent)
+    request.add_header('Accept-Encoding', 'gzip')
+    opener = urllib2.build_opener()
+    f = opener.open(request)
+    result = f.read()
+    if f.headers.get('content-encoding', '') == 'gzip':
+        result = gzip.GzipFile(fileobj=StringIO(result)).read()
+    f.close()
+    return result
 
 def re_parts(regex_list, text):
     """
@@ -83,6 +83,17 @@ def re_parts(regex_list, text):
         yield (-1, last_bit)
 
 def replace(text, max_width=MAX_WIDTH, max_height=MAX_HEIGHT):
+    """
+    Scans a block of text, replacing anything matched by a ``ProviderRule``
+    pattern with an OEmbed html snippet, if possible.
+    
+    Templates should be stored at oembed/{format}.html, so for example:
+        
+        oembed/video.html
+        
+    These templates are passed a context variable, ``response``, which is a 
+    dictionary representation of the response.
+    """
     rules = list(ProviderRule.objects.all())
     patterns = [re.compile(r.regex) for r in rules] # Compiled patterns from the rules
     parts = [] # The parts that we will assemble into the final return value.
@@ -91,10 +102,10 @@ def replace(text, max_width=MAX_WIDTH, max_height=MAX_HEIGHT):
     urls = set() # A set of URLs to try to lookup from the database.
     stored = {} # A mapping of URLs to StoredOEmbed objects.
     index = 0
-    # First let's pass through the text, populating our data structures.
+    # First we pass through the text, populating our data structures.
     for i, part in re_parts(patterns, text):
         if i == -1:
-            parts.append(conditional_escape(part))
+            parts.append(part)
             index += 1
         else:
             to_append = ""
@@ -110,19 +121,28 @@ def replace(text, max_width=MAX_WIDTH, max_height=MAX_HEIGHT):
             if to_append:
                 parts.append(to_append)
                 index += 1
+    # Now we fetch a list of all stored patterns, and put it in a dictionary 
+    # mapping the URL to to the stored model instance.
     for stored_embed in StoredOEmbed.objects.filter(match__in=urls, max_width=max_width, max_height = max_height):
         stored[stored_embed.match] = stored_embed
+    # Now we're going to do the actual replacement of URL to embed.
     for i, id_to_replace in enumerate(indices):
         rule = rules[indices_rules[i]]
         part = parts[id_to_replace]
         try:
+            # Try to grab the stored model instance from our dictionary, and
+            # use the stored HTML fragment as a replacement.
             parts[id_to_replace] = stored[part].html
         except KeyError:
             try:
+                # Build the URL based on the properties defined in the OEmbed spec.
                 url = u"%s?url=%s&maxwidth=%s&maxheight=%s&format=%s" % (
                     rule.endpoint, part, max_width, max_height, FORMAT
                 )
+                # Fetch the link and parse the JSON.
                 resp = simplejson.loads(fetch(url))
+                # Depending on the embed type, grab the associated template and
+                # pass it the parsed JSON response as context.
                 replacement = render_to_string('oembed/%s.html' % resp['type'], {'response': resp})
                 if replacement:
                     stored_embed = StoredOEmbed.objects.create(
@@ -136,7 +156,8 @@ def replace(text, max_width=MAX_WIDTH, max_height=MAX_HEIGHT):
                 else:
                     raise ValueError
             except ValueError:
-                parts[id_to_replace] = conditional_escape(part)
+                parts[id_to_replace] = part
             except KeyError:
-                parts[id_to_replace] = conditional_escape(part)
+                parts[id_to_replace] = part
+    # Combine the list into one string and return it.
     return mark_safe(u''.join(parts))
