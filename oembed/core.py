@@ -159,5 +159,7 @@ def replace(text, max_width=MAX_WIDTH, max_height=MAX_HEIGHT):
                 parts[id_to_replace] = part
             except KeyError:
                 parts[id_to_replace] = part
+            except urllib2.HTTPError:
+                parts[id_to_replace] = part
     # Combine the list into one string and return it.
     return mark_safe(u''.join(parts))
