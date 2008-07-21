@@ -1,9 +1,17 @@
 from django import template
+from django.template.defaultfilters import stringfilter
 from oembed.core import replace
 
 register = template.Library()
 
-def oembed(parser, token):
+def oembed(input):
+    return replace(input)
+oembed.is_safe = True
+oembed = stringfilter(oembed)
+
+register.filter('oembed', oembed)
+
+def do_oembed(parser, token):
     """
     A node which parses everything between its two nodes, and replaces any links
     with OEmbed-provided objects, if possible.
@@ -28,7 +36,8 @@ def oembed(parser, token):
     nodelist = parser.parse(('endoembed',))
     parser.delete_first_token()
     return OEmbedNode(nodelist, width, height)
-oembed = register.tag(oembed)
+
+register.tag('oembed', do_oembed)
 
 class OEmbedNode(template.Node):
     def __init__(self, nodelist, width, height):
