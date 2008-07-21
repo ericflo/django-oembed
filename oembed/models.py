@@ -18,9 +18,6 @@ class ProviderRule(models.Model):
     
     def __unicode__(self):
         return self.name or self.endpoint
-    
-    class Admin:
-        pass
 
 class StoredOEmbed(models.Model):
     match = models.CharField(max_length=2000)
