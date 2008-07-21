@@ -130,6 +130,7 @@ def replace(text, max_width=MAX_WIDTH, max_height=MAX_HEIGHT):
                 last_char = ' '
             if last_char in "'\"":
                 del indices[i]
+                del indices_rules[i]
         if idx < len(parts):
             try:
                 first_char = parts[idx+1][0]
@@ -137,6 +138,7 @@ def replace(text, max_width=MAX_WIDTH, max_height=MAX_HEIGHT):
                 first_char = ' '
             if first_char in "'\"":
                 del indices[i]
+                del indices_rules[i]
     # Now we fetch a list of all stored patterns, and put it in a dictionary 
     # mapping the URL to to the stored model instance.
     for stored_embed in StoredOEmbed.objects.filter(match__in=urls, max_width=max_width, max_height = max_height):
