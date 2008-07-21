@@ -14,7 +14,7 @@ from django.utils.safestring import mark_safe
 from oembed.models import ProviderRule, StoredOEmbed
 from django.template.loader import render_to_string
 
-END_OVERRIDES = (')', ',', '.', '>', ']', ';')
+END_OVERRIDES = (')', ',', '.', '>', ']', ';', '"', "'")
 MAX_WIDTH = getattr(settings, "OEMBED_MAX_WIDTH", 320)
 MAX_HEIGHT = getattr(settings, "OEMBED_MAX_HEIGHT", 240)
 FORMAT = getattr(settings, "OEMBED_FORMAT", "json")
