@@ -121,24 +121,6 @@ def replace(text, max_width=MAX_WIDTH, max_height=MAX_HEIGHT):
             if to_append:
                 parts.append(to_append)
                 index += 1
-    # Sanity checking to determine if the match is actually in another tag.
-    for i, idx in enumerate(indices):
-        if idx > 0:
-            try:
-                last_char = parts[idx-1][-1]
-            except IndexError:
-                last_char = ' '
-            if last_char in "'\"":
-                del indices[i]
-                del indices_rules[i]
-        if idx < len(parts):
-            try:
-                first_char = parts[idx+1][0]
-            except IndexError:
-                first_char = ' '
-            if first_char in "'\"":
-                del indices[i]
-                del indices_rules[i]
     # Now we fetch a list of all stored patterns, and put it in a dictionary 
     # mapping the URL to to the stored model instance.
     for stored_embed in StoredOEmbed.objects.filter(match__in=urls, max_width=max_width, max_height = max_height):
