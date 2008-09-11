@@ -20,7 +20,7 @@ class ProviderRule(models.Model):
         return self.name or self.endpoint
 
 class StoredOEmbed(models.Model):
-    match = models.CharField(max_length=2000)
+    match = models.TextField()
     max_width = models.IntegerField()
     max_height = models.IntegerField()
     html = models.TextField()
