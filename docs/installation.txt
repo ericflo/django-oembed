@@ -1,3 +1,6 @@
+Installing django-oembed
+========================
+
 Thanks for downloading django-oembed!
 
 To install it, first use subversion to check out the source code::
