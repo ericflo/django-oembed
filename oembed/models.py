@@ -1,7 +1,5 @@
 import datetime
 from django.db import models
-from django.conf import settings
-from django.core.cache import cache
 
 JSON = 1
 XML = 2
