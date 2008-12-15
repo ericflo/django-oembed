@@ -1,6 +1,7 @@
 import re
 import urllib2
 import gzip
+from heapq import heappush, heappop
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -13,6 +14,8 @@ from django.conf import settings
 from django.utils.safestring import mark_safe
 from oembed.models import ProviderRule, StoredOEmbed
 from django.template.loader import render_to_string
+import logging
+logger = logging.getLogger("oembed core")
 
 END_OVERRIDES = (')', ',', '.', '>', ']', ';')
 MAX_WIDTH = getattr(settings, "OEMBED_MAX_WIDTH", 320)
@@ -58,26 +61,39 @@ def re_parts(regex_list, text):
     def match_compare(x, y):
         return x.start() - y.start()
     prev_end = 0
-    iters = [r.finditer(text) for r in regex_list]
+    iter_dict = dict((r, r.finditer(text)) for r in regex_list)
+    
+    # a heapq containing matches
     matches = []
-    while iters:
-        if matches:
-            match = matches.pop(0)
-            (start, end) = match.span()
-            if start > prev_end:
-                yield (-1, text[prev_end:start])
-                yield (regex_list.index(match.re), text[start:end])
-            elif start == prev_end:
-                yield (regex_list.index(match.re), text[start:end])
-            prev_end = end
-        else:
-            matches = []
-            for iterator in iters:
-                try:
-                    matches.append(iterator.next())
-                except StopIteration:
-                    iters.remove(iterator)
-            matches = sorted(matches, match_compare)
+    
+    # bootstrap the search with the first hit for each iterator
+    for regex, iterator in iter_dict.items():
+        try:
+            match = iterator.next()
+            heappush(matches, (match.start(), match))
+        except StopIteration:
+            iter_dict.pop(regex)
+    
+    # process matches, revisiting each iterator from which a match is used
+    while matches:
+        # get the earliest match
+        start, match = heappop(matches)
+        end = match.end()
+        if start > prev_end:
+            # yield the text from current location to start of match
+            yield (-1, text[prev_end:start])
+        # yield the match
+        yield (regex_list.index(match.re), text[start:end])
+        # get the next match from the iterator for this match
+        if match.re in iter_dict:
+            try:
+                newmatch = iter_dict[match.re].next()
+                heappush(matches, (newmatch.start(), newmatch))
+            except StopIteration:
+                iter_dict.pop(match.re)
+        prev_end = end
+
+    # yield text from end of last match to end of text
     last_bit = text[prev_end:]
     if len(last_bit) > 0:
         yield (-1, last_bit)
