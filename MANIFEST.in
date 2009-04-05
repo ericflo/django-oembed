@@ -2,6 +2,6 @@ include CONTRIBUTORS.txt
 include INSTALL.txt
 include LICENSE.txt
 include README.txt
-include docs/ *.txt
+recursive-include docs *.txt
 include oembed/fixtures/initial_data.json
 recursive-include oembed/templates *.html
