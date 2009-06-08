@@ -11,8 +11,8 @@ class OEmbedTests(TestCase):
     
     loc = u"http://www.viddler.com/explore/SYSTM/videos/49/"
     
-    embed = u'<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="320" height="222" id="viddlerplayer-e5cb3aac"><param name="movie" value="http://www.viddler.com/player/e5cb3aac/" /><param name="allowScriptAccess" value="always" /><param name="allowFullScreen" value="true" /><embed src="http://www.viddler.com/player/e5cb3aac/" width="320" height="222" type="application/x-shockwave-flash" allowScriptAccess="always" allowFullScreen="true" name="viddlerplayer-e5cb3aac" ></embed></object>'
-
+    embed = u'<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width=\r\n"320" height="222" id="viddlerplayer-e5cb3aac"><param name="movie" value="http://www.viddler.com/player/e5cb3aac/" /><param name="allowScriptAccess" value="always" /><param name="wmode" value="transparent" /><param name="allowFullScreen" value="true" /><embed src="http://www.viddler.com/player/e5cb3aac/" width="320" height="222" type="application/x-shockwave-flash" allowScriptAccess="always" allowFullScreen="true" wmode="transparent" name="viddlerplayer-e5cb3aac" ></embed></object>'
+    
     def testNoEmbed(self):
         self.assertEquals(
             replace(self.noembed),
