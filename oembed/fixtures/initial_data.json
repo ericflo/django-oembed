@@ -3,7 +3,7 @@
         "pk": 1, 
         "model": "oembed.providerrule", 
         "fields": {
-            "regex": "http://\\S*?flickr.com/\\S*", 
+            "regex": "http://(?:www\\.)?flickr\\.com/photos/\\S+?/(?:sets/)?\\d+/?", 
             "endpoint": "http://www.flickr.com/services/oembed/", 
             "name": "Flickr", 
             "format": 1
@@ -26,16 +26,6 @@
             "regex": "http://qik.com/\\S*", 
             "endpoint": "http://qik.com/api/oembed.json", 
             "name": "Qik", 
-            "format": 1
-        }
-    }, 
-    {
-        "pk": 4, 
-        "model": "oembed.providerrule", 
-        "fields": {
-            "regex": "http://\\S*?pownce.com/\\S*", 
-            "endpoint": "http://api.pownce.com/2.1/oembed.json", 
-            "name": "Pownce", 
             "format": 1
         }
     }, 
@@ -113,7 +103,7 @@
         "pk": 12, 
         "model": "oembed.providerrule", 
         "fields": {
-            "regex": "http://twitter.com/\\S*/statuses/\\S*", 
+            "regex": "http://(?:www\\.)?twitter\\.com/(?:\\w{1,20})/statuses/\\d+/?", 
             "endpoint": "http://oohembed.com/oohembed/", 
             "name": "Twitter Status (OohEmbed)", 
             "format": 1
@@ -133,7 +123,7 @@
         "pk": 14, 
         "model": "oembed.providerrule", 
         "fields": {
-            "regex": "http://\\S*.youtube.com/watch\\S*", 
+            "regex": "http://(?:www\\.)?youtube\\.com/watch\\?v=[A-Za-z0-9\\-=_]{11}", 
             "endpoint": "http://oohembed.com/oohembed/", 
             "name": "YouTube (OohEmbed)", 
             "format": 1
@@ -143,7 +133,7 @@
         "pk": 15, 
         "model": "oembed.providerrule", 
         "fields": {
-            "regex": "http://vimeo.com/\\S*", 
+            "regex": "http://(?:www\\.)?vimeo\\.com/\\d+", 
             "endpoint": "http://vimeo.com/api/oembed.json", 
             "name": "Vimeo", 
             "format": 1
