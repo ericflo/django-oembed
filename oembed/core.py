@@ -157,6 +157,11 @@ def replace(text, max_width=MAX_WIDTH, max_height=MAX_HEIGHT):
                 )
                 # Fetch the link and parse the JSON.
                 resp = simplejson.loads(fetch(url))
+                
+                # link types that don't have html elements aren't dealt with right now.
+                if resp['type'] == 'link' and 'html' not in resp:
+                    raise ValueError
+                
                 # Depending on the embed type, grab the associated template and
                 # pass it the parsed JSON response as context.
                 replacement = render_to_string('oembed/%s.html' % resp['type'], {'response': resp})
